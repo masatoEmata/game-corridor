@@ -21,20 +21,30 @@ class Game:
         self.__init__()
 
     def move_soldier(self, direction):
-        if self.game_won:
-            return "ゲームは既に終了しています。"
-        if direction.lower() != "right":
-            return "アラート：右にのみ移動できます。"
-        else:
-            # 現在の位置からソルジャーを削除
-            self.map_x[self.soldier_position[0]][self.soldier_position[1]] = 0
-            # 右に移動
-            self.soldier_position[1] += 1
-            if self.soldier_position[1] > self.field_width - 1:
-                # フィールドを超えた場合
-                self.game_won = True
-                return "ゲームに勝利しました！"
-            else:
-                # 新しい位置にソルジャーを配置
-                self.map_x[self.soldier_position[0]][self.soldier_position[1]] = 1
-                return f"ソルジャーは位置{self.soldier_position}に移動しました。"
+        # 移動方向のベクトルを定義
+        directions = {"up": (-1, 0), "down": (1, 0), "left": (0, -1), "right": (0, 1)}
+        if direction not in directions:
+            return "無効な方向です。'up', 'down', 'left', 'right' のいずれかを入力してください。"
+        delta_row, delta_col = directions[direction]
+        new_row = self.soldier_position[0] + delta_row
+        new_col = self.soldier_position[1] + delta_col
+
+        # 勝利条件のチェック（右端を超えた場合）
+        if new_col > self.field_width - 1:
+            self.game_won = True
+            return "ゲームに勝利しました！"
+        # マップの範囲外への移動をチェック
+        if (
+            new_row < 0
+            or new_row >= self.field_height
+            or new_col < 0
+            or new_col >= self.field_width
+        ):
+            return "エラー：マップの領域を超えています。"
+        # ソルジャーの位置を更新
+        self.map_x[self.soldier_position[0]][
+            self.soldier_position[1]
+        ] = 0  # 現在の位置をクリア
+        self.soldier_position = [new_row, new_col]
+        self.map_x[new_row][new_col] = 1  # 新しい位置にソルジャーを配置
+        return f"ソルジャーは位置 {self.soldier_position} に移動しました。"
